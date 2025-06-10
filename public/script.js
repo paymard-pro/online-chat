@@ -1,4 +1,4 @@
-const socket = io('http://localhost:3000');
+const socket = io('https://online-chat-test-38ge.onrender.com');
 const chatBox = document.getElementById('chatBox');
 const messageInput = document.getElementById('messageInput');
 
