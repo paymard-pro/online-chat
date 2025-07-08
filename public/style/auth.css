@@ -1,0 +1,83 @@
+
+
+#authWindow{
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    gap: 20px;
+}
+
+
+#name{
+    font-size: 20px;
+    text-align: center;
+    width: 100%;
+    height: 30px;
+    border-color: rgba(0 , 0 , 0 , 0);
+    border-bottom: 1px solid gray;
+}
+
+
+#applyBtn{
+    align-self: center;
+    width: 150px;
+    font-size: 20px;
+}
+
+#nameBox{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: 40px;
+    padding: 30px;
+    gap: 20px;
+
+}
+
+
+
+#avatarBox{
+    display: inline-grid;
+    justify-content: center;
+    align-items: center;
+    grid-template-columns: repeat(3 , 1fr) ;
+    padding: 30px;
+    row-gap: 30px;
+    column-gap: 30px;
+}
+
+.borderAvatar{
+    display: inline-block;
+    border-radius: 45%;
+    padding: 3px;
+    border: 3px solid rgba(0 , 0 , 0 , 0);
+}
+
+.avatar{
+    display: inline-block;
+}
+
+.avatarImg{
+    width: 120px;
+    height: 120px;
+}
+
+
+.btn1 {
+    padding: 12px 30px;
+    border: 2px solid #00f0ff;
+    background: black;
+    color: #00f0ff;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.btn1:hover , .borderAvatar:hover{
+    box-shadow: 0 0 10px #00f0ff, 0 0 40px #00f0ff;
+    transform: scale(1.05);
+}
