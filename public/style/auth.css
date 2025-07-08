@@ -1,14 +1,18 @@
 
-
 #authWindow{
-    display: inline-flex;
+    background-color: #24A1DE;
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 30px;
-    gap: 20px;
+    gap: 25px;
+    box-sizing: border-box;
 }
 
+#authWindow > h1 {
+    color: white;
+}
 
 #name{
     font-size: 20px;
@@ -27,20 +31,21 @@
 }
 
 #nameBox{
+    background-color: white;
     display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    height: 40px;
+    height: 10%;
     padding: 30px;
     gap: 20px;
-
 }
 
-
-
 #avatarBox{
-    display: inline-grid;
+    background-color: white;
+    display: grid;
+    width: 100%;
+    height: 60%;
     justify-content: center;
     align-items: center;
     grid-template-columns: repeat(3 , 1fr) ;
@@ -57,12 +62,16 @@
 }
 
 .avatar{
+    cursor: pointer;
+    width: 100%;
+    aspect-ratio: 1 / 1;
     display: inline-block;
 }
 
 .avatarImg{
-    width: 120px;
-    height: 120px;
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 1;
 }
 
 
