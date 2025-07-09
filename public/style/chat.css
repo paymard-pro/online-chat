@@ -1,41 +1,91 @@
-#chatBox {
 
-    font-size: 20px;
-    width: 600px;
-    height: 300px;
-    border: 1px solid #ccc;
-    overflow-y: scroll;
+
+#chatWindow{
+    display: flex;
+    flex-direction: column;
+}
+
+
+#chatHeader{
+    width: 100%;
+    height: 10%;
+    display: flex;
+    box-sizing: border-box;
+    padding-left: 20px;
+    gap: 15px;
+    background-color: #24A1DE;
+    align-items: center;
+}
+
+#chatHeader > .back {
+    height: 50%;
+    aspect-ratio: 1 / 1;
+}
+
+#chatHeader > .prof {
+    margin-left: 15px;
+    height: 70%;
+    aspect-ratio: 1 / 1;
+}
+
+#chatHeader > span {
+    color: white;
+}
+
+#chatScreen {
     padding: 10px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    flex: 1;
+    overflow: auto;
+    width: 100%;
 }
 
 
-#messageInput {
-    display: inline-block;
-    width: 200px;
-    padding: 8px;
-
+.message{
+    border-radius: 10px;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 10px;
 }
 
-
-#sendButton { padding: 8px 15px; }
-
-
-.msg{
-    display: inline-block;
-    padding: 1rem;
-    border: 1px solid ;
-    border-radius: 8px;
-}
-.send{
-    align-self: flex-end;
-    border-color: #00ff9d;
-}
-
-.receive {
+.receive{
+    background-color: white;
     align-self: flex-start;
-    border-color: aqua;
 }
+
+
+.send{
+    background-color: #a8ffcd;
+    align-self: flex-end;
+}
+
+#chatInput{
+    width: 100%;
+    height: 8%;
+    display: flex;
+    background-color: white;
+    box-sizing: border-box;
+    padding: 0 15px;
+    gap: 10px;
+    align-items: center;
+}
+
+#chatInput > input {
+    padding: 0 10px;
+    flex: 1;
+    height: 70%;
+    background-color: rgba(0 , 0 , 0 , 0);
+    border: none;
+    text-align: left;
+}
+
+#chatInput > input:active{
+    border: none;
+}
+#chatInput > img {
+    height: 60%;
+    aspect-ratio: 1 /1;
+}
+
