@@ -2,6 +2,10 @@ const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
 const path = require('path'); // برای کار با مسیر فایل‌ها
+const  { v4 : uuidv4 } = require('uuid');
+const sqlite3 = require('sqlite3').verbose();
+const db = new sqlite3.Database('chat.db');
+app.use(express.json());
 
 // سرو کردن فایل‌های استاتیک (مثل HTML, CSS, JS)
 app.use(express.static(path.join(__dirname, 'public')));
@@ -21,6 +25,47 @@ const io = require('socket.io')(http, {
 // لیست کاربران و اتاق‌ها
 const users = [];
 const rooms = {};
+
+db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        userId TEXT UNIQUE,
+        name TEXT ,
+        avatar INTEGER
+    )
+`)
+
+db.run(`
+    CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        content TEXT ,
+        sender_id TEXT,
+        receiver_id TEXT, 
+        seen INTEGER
+    )
+`)
+
+
+app.post("/api/users", (req, res) => {
+    const { name  , avatar} = req.body;
+    if (!name || !avatar) {
+        return res.status(400).json({ success: false, error: "Field data is required" });
+    }
+
+    const uniqueId = uuidv4();
+
+    db.run('INSERT INTO users (name , userId , avatar) VALUES (?,?,?)' , [name , uniqueId , avatar] , (err) => {
+        if(err){
+            console.log(err);
+            return
+        }
+
+    })
+
+    res.status(201).json({id:uniqueId});
+
+});
+
 
 io.on('connection', (socket) => {
     console.log('کاربر متصل شد:', socket.id);

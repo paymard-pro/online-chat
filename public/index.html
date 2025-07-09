@@ -3,11 +3,12 @@
 <head>
 
     <meta charset="UTF-8">
-    <title>چت آنلاین ساده</title>
+    <title>چت آنلاین</title>
     <link href="style/auth.css" rel="stylesheet">
     <link href="style/main.css" rel="stylesheet">
     <link href="style/chat.css" rel="stylesheet">
     <link href="style/utils.css" rel="stylesheet">
+    <link href="style/contents.css" rel="stylesheet">
 
 </head>
 
@@ -80,32 +81,96 @@
             </div>
         </div>
 
-        <button id="authSub" class="btn1" onclick="clickAuthSub()">تایید</button>
+        <button id="authSub" class="btn1" onclick="submitAuth()">تایید</button>
     </div>
 </div>
 
-<div id="mainMenu" class="menu" style="display: none">
-    <div id="mainBox" class="box">
+
+<div id="mainMenu" class="menu">
+
+    <div id="mainWindow" class="window phoneScreen">
+
 
         <div id="headerProf">
-            <h1></h1>
             <img>
+            <h1>آنلاین چت</h1>
         </div>
 
-        <div class="line"></div>
+        <div id="chatList">
 
-        <div id="listOnline">
-            
         </div>
 
-        <div class="line"></div>
-
-        <div id="historyChat">
-            
+        <div id="newChat" onclick="clickNewChat()">
+            <img src="">
         </div>
 
     </div>
 </div>
+
+
+<div id="contentsMenu" class="menu">
+    <div id="contentsWindow" class="window phoneScreen">
+
+        <div id="contHeader">
+            <img src="" onclick="clickBackContentsMenu()">
+            <h1>گفتگوی جدید</h1>
+        </div>
+
+        <div id="contentsPage">
+
+            <div id="newGroup" class="content">
+                <img src="">
+                <span>گروه جدید</span>
+            </div>
+
+            <div id="allContents">
+
+                <div id="textAllContent">
+                    <span>لیست مخاطبین شما</span>
+                </div>
+
+                <div class="content">
+                    <img src="avatars/1.png">
+                    <div class="infoContent">
+                        <b id="infoContentName">ببراز</b>
+                        <span id="infoContentStatus">آنلاین</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<div id="chatMenu" class="menu">
+
+    <div id="chatWindow" class="window phoneScreen">
+
+        <div id="chatHeader">
+            <img src="" class="back">
+            <img src="" class="prof">
+            <span>امیرزا</span>
+        </div>
+
+        <div id="chatScreen">
+            <div class="message receive">سلام خوبی؟ چه خبر؟</div>
+            <div class="message send">سلام ممنونم تو جطوری؟</div>
+        </div>
+
+        <div id="chatInput">
+            <input placeholder="پیامت رو بنویس">
+            <img src="">
+        </div>
+
+    </div>
+
+</div>
+
+
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="client.js"></script>
