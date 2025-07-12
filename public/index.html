@@ -8,7 +8,7 @@
     <link href="style/main.css" rel="stylesheet">
     <link href="style/chat.css" rel="stylesheet">
     <link href="style/utils.css" rel="stylesheet">
-    <link href="style/contents.css" rel="stylesheet">
+    <link href="style/contacts.css" rel="stylesheet">
 
 </head>
 
@@ -90,54 +90,70 @@
 
     <div id="mainWindow" class="window phoneScreen">
 
-
         <div id="headerProf">
             <img>
             <h1>آنلاین چت</h1>
         </div>
 
         <div id="chatList">
-
         </div>
+
+        <template id="chat-template">
+            <div class="chat" data-id = '' onclick="loadChat(this)">
+                <img src = 'avatars/1.png'>
+                <div class="showChat">
+                    <b>امیرزا</b>
+                    <span>آخرین پیام اینه ...</span>
+                </div>
+                <div class="countMassage">
+                    <span>1</span>
+                </div>
+            </div>
+        </template>
 
         <div id="newChat" onclick="clickNewChat()">
             <img src="">
         </div>
 
     </div>
+
 </div>
 
 
-<div id="contentsMenu" class="menu">
-    <div id="contentsWindow" class="window phoneScreen">
+
+
+<div id="contactsMenu" class="menu">
+    <div id="contactsWindow" class="window phoneScreen">
 
         <div id="contHeader">
-            <img src="" onclick="clickBackContentsMenu()">
+            <img src="" onclick="clickBackContact()">
             <h1>گفتگوی جدید</h1>
         </div>
 
-        <div id="contentsPage">
+        <div id="contactsPage">
 
-            <div id="newGroup" class="content">
+            <div id="newGroup" class="contact">
                 <img src="">
                 <span>گروه جدید</span>
             </div>
 
-            <div id="allContents">
+            <div id="textAllContact">
+                <span>لیست مخاطبین شما</span>
+            </div>
 
-                <div id="textAllContent">
-                    <span>لیست مخاطبین شما</span>
-                </div>
-
-                <div class="content">
-                    <img src="avatars/1.png">
-                    <div class="infoContent">
-                        <b id="infoContentName">ببراز</b>
-                        <span id="infoContentStatus">آنلاین</span>
-                    </div>
-                </div>
+            <div id="allContacts">
 
             </div>
+
+            <template id = "contact-template">
+                <div class="contact" data-id = "" onclick="loadChat(this)">
+                    <img src="avatars/1.png">
+                    <div class="infoContact">
+                        <b>ببراز</b>
+                        <span>آنلاین</span>
+                    </div>
+                </div>
+            </template>
 
         </div>
     </div>
@@ -151,19 +167,18 @@
     <div id="chatWindow" class="window phoneScreen">
 
         <div id="chatHeader">
-            <img src="" class="back">
+            <img src="" class="back" onclick="loadMain()">
             <img src="" class="prof">
             <span>امیرزا</span>
         </div>
 
         <div id="chatScreen">
-            <div class="message receive">سلام خوبی؟ چه خبر؟</div>
-            <div class="message send">سلام ممنونم تو جطوری؟</div>
+
         </div>
 
         <div id="chatInput">
             <input placeholder="پیامت رو بنویس">
-            <img src="">
+            <img src="" onclick="clickSend()">
         </div>
 
     </div>
