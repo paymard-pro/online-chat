@@ -66,9 +66,10 @@ app.post("/api/users", (req, res) => {
 });
 
 
-app.get('api/users' , (req , res) => {
-    res.json(users);
+app.get('api/users/:id' , (req , res) => {
+    res.json(users[req.params.id]);
 })
+
 
 app.post('/api/data' , (req , res) => {
     let data = req.body;
@@ -87,6 +88,8 @@ io.on('connection', (socket) => {
     }
     else
         console.log('user connected first time: ', socket.id);
+
+
 
     socket.on('setSocket' , (data) => {
         sockets[data.id] = socket;
