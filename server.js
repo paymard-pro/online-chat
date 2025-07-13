@@ -42,7 +42,8 @@ db.prepare(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         content TEXT ,
         send TEXT,
-        receive TEXT
+        receive TEXT,
+        read INTEGER DEFAULT 0
     )
 `).run();
 
@@ -59,7 +60,7 @@ app.post("/api/users", (req, res) => {
     let newUser = {id: uniqueId , name , avatar };
     users.push(newUser);
 
-    console.log(users);
+    console.log(newUser);
 
     res.status(201).json({id:uniqueId});
 
@@ -69,6 +70,7 @@ app.get('/api/users' , (req , res) => {
     res.json(users);
 })
 
+
 app.get('/api/user' , (req , res) => {
     console.log('id: ', req.query.id);
     console.log('user: ' , users.find(u => u.id == req.query.id)) ;
@@ -77,14 +79,15 @@ app.get('/api/user' , (req , res) => {
 })
 
 
+
 app.post('/api/data' , (req , res) => {
     let data = req.body;
     const id = data.id;
-    const messagesMe = db.prepare(`SELECT content , send , receive FROM messages WHERE send = ? OR receive = ?`).all(id , id);
-    const usersMe = db.prepare(`SELECT DISTINCT u.name , u.avatar , u.userId FROM users u WHERE u.userId != ? AND (u.userId IN (SELECT receive FROM messages WHERE send = ?) OR u.userId IN (SELECT send FROM messages WHERE receive = ?))`).all(id , id , id);
+    const messages = db.prepare(`SELECT * FROM messages WHERE send = ? OR receive = ? ORDER BY id ASC  `).all(id , id);
+    const users = db.prepare(`SELECT DISTINCT u.name , u.avatar , u.userId AS id FROM users u WHERE u.userId != ? AND (u.userId IN (SELECT receive FROM messages WHERE send = ?) OR u.userId IN (SELECT send FROM messages WHERE receive = ?))`).all(id , id , id);
     const me = db.prepare(`SELECT name , userId AS id , avatar FROM users WHERE userid = ?`).all(id);
     users.push(me);
-    res.json({messages:messagesMe , users:usersMe , me});
+    res.json({messages , users , me});
 })
 
 io.on('connection', (socket) => {
@@ -101,13 +104,17 @@ io.on('connection', (socket) => {
         sockets[data.id] = socket;
         socket.userId = data.id;
 
-        io.to('contacts').emit('onlineContact' , users.find(u => u.id == data.id));
+        io.emit('onlineContact' , users.find(u => u.id == data.id));
 
     })
 
     socket.on('send' , (data) => {
         db.prepare(`INSERT INTO messages (content , send , receive) VALUES (? , ? , ?)`).run(data.message , data.send , data.receive);
         sockets[data.receive].emit('receive' , {message: data.message , send: data.send}) ;
+    })
+
+    socket.on('read' , (data) => {
+        db.prepare(`UPDATE messages SET read = 1 WHERE send = ? AND receive = ? AND read = 0`).run(data.send , socket.userId);
     })
 
     socket.on('disconnect', () => {
@@ -118,7 +125,7 @@ io.on('connection', (socket) => {
         delete sockets[id];
         users.splice(users.indexOf(users.find(u => u.id == id)) , 1);
 
-        io.to('contacts').emit('offlineContact' , {id});
+        io.emit('offlineContact' , {id});
     });
 
 });
