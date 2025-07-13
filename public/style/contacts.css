@@ -1,4 +1,4 @@
-#contentsWindow{
+#contactsWindow{
     display: flex;
     flex-direction: column;
 }
@@ -30,7 +30,7 @@
     font-size: 25px;
 }
 
-#contentsPage{
+#contactsPage{
     flex: 1;
     overflow-y: auto;
     display: flex;
@@ -41,7 +41,7 @@
 
 }
 
-#allContents{
+#allContacts{
     width: 100%;
     height: 500px;
     display: flex;
@@ -49,16 +49,16 @@
     gap: 5px;
 }
 
-#textAllContent{
+#textAllContact{
     display: flex;
-    justify-content: center;
+    justify-contact: center;
     align-items: center;
     width: 100%;
     height: 5%;
     background-color: #cccccc;
 }
 
-.content{
+.contact{
     align-items: center;
     height: 20%;
     box-sizing: border-box;
@@ -67,12 +67,12 @@
     gap: 20px;
 }
 
-.content > img {
+.contact > img {
     height: 80%;
     aspect-ratio: 1 / 1;
 }
 
-.infoContent{
+.infoContact{
     display: flex;
     flex-direction: column;
     align-items: center;

@@ -40,7 +40,7 @@ db.prepare(`
 db.prepare(`
     CREATE TABLE IF NOT EXISTS messages (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        contact TEXT ,
+        content TEXT ,
         send TEXT,
         receive TEXT
     )
@@ -65,16 +65,22 @@ app.post("/api/users", (req, res) => {
 
 });
 
+app.get('/api/users' , (req , res) => {
+    res.json(users);
+})
 
-app.get('api/users/:id' , (req , res) => {
-    res.json(users[req.params.id]);
+app.get('/api/user' , (req , res) => {
+    console.log('id: ', req.query.id);
+    console.log('user: ' , users.find(u => u.id == req.query.id)) ;
+
+    res.json(users.find(u => u.id == req.query.id));
 })
 
 
 app.post('/api/data' , (req , res) => {
     let data = req.body;
     const id = data.id;
-    const messagesMe = db.prepare(`SELECT contact , send , receive FROM messages WHERE send = ? OR receive = ?`).all(id , id);
+    const messagesMe = db.prepare(`SELECT content , send , receive FROM messages WHERE send = ? OR receive = ?`).all(id , id);
     const usersMe = db.prepare(`SELECT DISTINCT u.name , u.avatar , u.userId FROM users u WHERE u.userId != ? AND (u.userId IN (SELECT receive FROM messages WHERE send = ?) OR u.userId IN (SELECT send FROM messages WHERE receive = ?))`).all(id , id , id);
     const me = db.prepare(`SELECT name , userId AS id , avatar FROM users WHERE userid = ?`).all(id);
     users.push(me);
@@ -95,20 +101,12 @@ io.on('connection', (socket) => {
         sockets[data.id] = socket;
         socket.userId = data.id;
 
-        io.to('contacts').emit('addContact' , users.find(u => u.id == data.id));
+        io.to('contacts').emit('onlineContact' , users.find(u => u.id == data.id));
 
-    })
-
-    socket.on('joinContacts' , () => {
-        socket.join('contacts');
-    })
-
-    socket.on('leaveContacts', () => {
-        socket.leave('contacts');
     })
 
     socket.on('send' , (data) => {
-        db.prepare(`INSERT INTO messages (contact , send , receive) VALUES (? , ? , ?)`).run(data.message , data.send , data.receive);
+        db.prepare(`INSERT INTO messages (content , send , receive) VALUES (? , ? , ?)`).run(data.message , data.send , data.receive);
         sockets[data.receive].emit('receive' , {message: data.message , send: data.send}) ;
     })
 
@@ -120,7 +118,7 @@ io.on('connection', (socket) => {
         delete sockets[id];
         users.splice(users.indexOf(users.find(u => u.id == id)) , 1);
 
-        io.to('contacts').emit('remContact' , {id});
+        io.to('contacts').emit('offlineContact' , {id});
     });
 
 });
