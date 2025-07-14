@@ -420,6 +420,13 @@ function loadData(data){
 
     console.log('1');
 
+    if(!data.me) {
+        alert('متاسفانه نتونستم اطلاعاتت رو پیدا کنم :(\nدوباره ثبت نام کن');
+        localStorage.clear();
+        start();
+        return;
+    }
+
     name = data.me.name ;
     avatar = data.me.avatar ;
 
