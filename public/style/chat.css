@@ -33,6 +33,7 @@
 }
 
 #chatScreen {
+    background-color: #f5f5f5;
     padding: 10px;
     display: flex;
     flex-direction: column;
@@ -40,8 +41,14 @@
     overflow: auto;
     width: 100%;
     gap: 5px;
+
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
 }
 
+#chatScreen::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
 
 .message{
     border-radius: 10px;

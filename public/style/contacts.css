@@ -20,9 +20,8 @@
 }
 
 #contHeader > img {
-    height: 60%;
+    height: 50%;
     aspect-ratio: 1 / 1;
-    margin-left: 20px;
 }
 
 #contHeader > h1 {
