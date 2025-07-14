@@ -38,7 +38,12 @@
 }
 
 #newGroup{
-
+    align-items: center;
+    height: 20%;
+    box-sizing: border-box;
+    padding-left: 10px;
+    display: flex;
+    gap: 20px;
 }
 
 #allContacts{

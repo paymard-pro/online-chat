@@ -25,8 +25,9 @@ const io = require('socket.io')(http, {
 });
 
 // لیست کاربران و اتاق‌ها
-const users = []; // [ ... , {id:.. , name:.. , avatar:.. } ]
-const sockets  = {};
+const users = {}; // { id : {id:.. , name:.. , avatar:.. } }
+const sockets  = {}; // { id : socket }
+let nextUserIndex = 1 ;
 
 db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
@@ -57,8 +58,8 @@ app.post("/api/users", (req, res) => {
     const uniqueId = uuidv4();
 
     db.prepare('INSERT INTO users (name , userId , avatar) VALUES (?,?,?)').run(name, uniqueId, avatar);
-    let newUser = {id: uniqueId , name , avatar };
-    users.push(newUser);
+    let newUser = {id: uniqueId , name , avatar , index : nextUserIndex++};
+    users[uniqueId] = newUser ;
 
     console.log(newUser);
 
@@ -67,15 +68,18 @@ app.post("/api/users", (req, res) => {
 });
 
 app.get('/api/users' , (req , res) => {
-    res.json(users);
+    const sortUsers = Object.values(users).sort((a,b) => a.index - b.index);
+    console.log('users : ' , sortUsers);
+
+    res.json(sortUsers);
 })
 
 
 app.get('/api/user' , (req , res) => {
     console.log('id: ', req.query.id);
-    console.log('user: ' , users.find(u => u.id == req.query.id)) ;
+    console.log('user: ' , users[req.query.id]) ;
 
-    res.json(users.find(u => u.id == req.query.id));
+    res.json(users[req.query.id]);
 })
 
 
@@ -85,8 +89,7 @@ app.post('/api/data' , (req , res) => {
     const id = data.id;
     const messages = db.prepare(`SELECT * FROM messages WHERE send = ? OR receive = ? ORDER BY id ASC  `).all(id , id);
     const users = db.prepare(`SELECT DISTINCT u.name , u.avatar , u.userId AS id FROM users u WHERE u.userId != ? AND (u.userId IN (SELECT receive FROM messages WHERE send = ?) OR u.userId IN (SELECT send FROM messages WHERE receive = ?))`).all(id , id , id);
-    const me = db.prepare(`SELECT name , userId AS id , avatar FROM users WHERE userid = ?`).all(id);
-    users.push(me);
+    const me = db.prepare(`SELECT name , userId AS id , avatar FROM users WHERE userid = ?`).get(id);
     res.json({messages , users , me});
 })
 
@@ -101,16 +104,26 @@ io.on('connection', (socket) => {
 
 
     socket.on('setSocket' , (data) => {
-        sockets[data.id] = socket;
-        socket.userId = data.id;
+        let userId = data.id
+        sockets[userId] = socket;
+        socket.userId = userId;
 
-        io.emit('onlineContact' , users.find(u => u.id == data.id));
+        if(!users[userId]) {
+            let user = db.prepare(`SELECT userId AS id, name, avatar FROM users WHERE userId == ?`).get(userId);
+            user.index = nextUserIndex++;
+            console.log('user get db: ', user);
+            users[userId] = user;
+        }
+
+
+        io.emit('onlineContact' , users[userId]);
 
     })
 
     socket.on('send' , (data) => {
         db.prepare(`INSERT INTO messages (content , send , receive) VALUES (? , ? , ?)`).run(data.message , data.send , data.receive);
-        sockets[data.receive].emit('receive' , {message: data.message , send: data.send}) ;
+        if(sockets[data.receive] && sockets[data.receive].connected)
+            sockets[data.receive].emit('receive' , {message: data.message , send: data.send}) ;
     })
 
     socket.on('read' , (data) => {
@@ -123,7 +136,7 @@ io.on('connection', (socket) => {
         console.log('user disconnected : ' , id);
 
         delete sockets[id];
-        users.splice(users.indexOf(users.find(u => u.id == id)) , 1);
+        delete users[id];
 
         io.emit('offlineContact' , {id});
     });
