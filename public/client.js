@@ -57,7 +57,7 @@ async function submitAuth(){
         alert('چرا هیچ آواتاری انتخاب نکردی؟');
         return;
     }
-    else if (locName.length >= 15){
+    else if (locName.length >= 20){
         alert('اسمت خیلی گندس!');
         return;
     }
