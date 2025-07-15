@@ -143,7 +143,7 @@ io.on('connection', (socket) => {
 
     async function responseBot(message){
 
-        let messages = [{role:'system' , content:'تو بات باحال هستی به اسم رایا و از سیاره ای دور دست اومدی و الان روی زمین سرگردان هستی'} ,
+        let messages = [{role:'system' , content:'تو یه ربات باحال هستی به اسم رایا و از سیاره ای دور دست اومدی و الان روی زمین سرگردان هستی. سعی کن کوتاه جواب بدی بعضی وقت ها هم ایموجی استفاده کن'} ,
             {role: 'user' , content: message}];
 
         const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
