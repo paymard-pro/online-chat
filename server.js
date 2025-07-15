@@ -4,6 +4,8 @@ const http = require('http').createServer(app);
 const path = require('path'); // برای کار با مسیر فایل‌ها
 const  { v4 : uuidv4 } = require('uuid');
 const Database = require('better-sqlite3');
+const {response} = require("express");
+
 // باز کردن یا ساخت دیتابیس chat.db
 const db = new Database('chat.db', { verbose: console.log }); // اگه خواستی لاگ کوئری‌ها رو ببینی
 
@@ -48,6 +50,8 @@ db.prepare(`
     )
 `).run();
 
+// insert bot into users
+db.prepare('INSERT OR IGNORE INTO users (name , userId , avatar) VALUES (?,?,?)').run('رایا', 'bot', 10);
 
 app.post("/api/users", (req, res) => {
     const { name  , avatar} = req.body;
@@ -120,11 +124,47 @@ io.on('connection', (socket) => {
 
     })
 
-    socket.on('send' , (data) => {
+    socket.on('send' , async (data) => {
         db.prepare(`INSERT INTO messages (content , send , receive) VALUES (? , ? , ?)`).run(data.message , data.send , data.receive);
-        if(sockets[data.receive] && sockets[data.receive].connected)
-            sockets[data.receive].emit('receive' , {message: data.message , send: data.send}) ;
+
+        if(data.receive == 'bot'){
+            console.log('1');
+            let message = await responseBot(data.message);
+            console.log('2');
+            db.prepare(`INSERT INTO messages (content , send , receive) VALUES (? , ? , ?)`).run(message , 'bot' , data.send);
+            socket.emit('receive' , {message , send : 'bot'});
+        }
+        else if(sockets[data.receive] && sockets[data.receive].connected) {
+            sockets[data.receive].emit('receive', { message: data.message, send: data.send});
+        }
     })
+
+
+
+    async function responseBot(message){
+
+        let messages = [{role:'system' , content:'تو بات باحال هستی به اسم رایا و از سیاره ای دور دست اومدی و الان روی زمین سرگردان هستی'} ,
+            {role: 'user' , content: message}];
+
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": "Bearer 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",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                model: "moonshotai/kimi-k2:free",
+                messages: messages
+            })
+        }) ;
+
+        const json = await response.json();
+
+        let res =  json.choices[0].message.content;
+        console.log("پاسخ:", res);
+        return res ;
+
+    }
 
     socket.on('read' , (data) => {
         db.prepare(`UPDATE messages SET read = 1 WHERE send = ? AND receive = ? AND read = 0`).run(data.send , socket.userId);

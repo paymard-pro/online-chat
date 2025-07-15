@@ -40,10 +40,11 @@
     flex: 1;
     overflow: auto;
     width: 100%;
-    gap: 5px;
+    gap: 10px;
 
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE 10+ */
+    scroll-behavior: smooth;
 }
 
 #chatScreen::-webkit-scrollbar {

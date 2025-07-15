@@ -1,4 +1,4 @@
-const socket = io('https://online-chat-7sal.onrender.com');
+const socket = io();
 //'https://online-chat-7sal.onrender.com'
 //'http://192.168.1.3:3000'
 
@@ -20,7 +20,7 @@ const chatScreen = document.getElementById('chatScreen');
 
 const allContacts = document.querySelector('#allContacts');
 
-
+const userBot = {name:'رایا' , avatar:10 , id:"bot"}
 
 let avatarSrc = avatar => `assets/avatars/${avatar}.png` ;
 let sendSrc = `assets/UI/send.png`;
@@ -181,6 +181,7 @@ async function clickNewChat(){
 
         allContacts.innerHTML = "";
 
+        loadContact(userBot); // load bot last of contacts
         for(let user of usersOn){
             loadContact(user)
         }
@@ -278,6 +279,8 @@ function loadChat(newUser){
     allMenu.forEach(e => {e.style.display = 'none'});
     chatMenu.style.display = 'block'
 
+    chatScreen.scrollTop =  chatScreen.scrollHeight ; //scroll down
+
     socket.emit('read' , {send: contactInChat});
 
 }
@@ -296,6 +299,7 @@ async function clickSend(){
     messageBox.innerHTML = message ;
 
     chatScreen.appendChild(messageBox);
+    chatScreen.scrollTop =  chatScreen.scrollHeight ; //scroll down
 
     users[contactInChat].messages.push({content: message , sendMe : true , id : nextMessageId++});
 
@@ -324,6 +328,7 @@ socket.on('receive' , async (data) => {
         messageBox.innerHTML = data.message ;
         messageBox.className = 'message receive';
         chatScreen.appendChild(messageBox);
+        chatScreen.scrollTop =  chatScreen.scrollHeight ; //scroll down
 
         socket.emit('read' , {send: contactInChat});
 
@@ -384,6 +389,8 @@ function getUserByContact(element){
 
 async function start(){
 
+    allMenu.forEach(e => {e.style.display = 'none'});
+
     let userId = localStorage.getItem('user-id');
     if(!userId){
         authMenu.style.display = 'block'
@@ -393,7 +400,6 @@ async function start(){
 
         id = userId;
 
-        socket.emit('setSocket' , {id});
 
         try{
             const res = await fetch('/api/data', {
@@ -403,6 +409,15 @@ async function start(){
 
             const data = await res.json();
             console.log('data: ' , data);
+
+            if(!data.me) {
+                alert('متاسفانه نتونستم اطلاعاتت رو پیدا کنم :(\nدوباره ثبت نام کن');
+                localStorage.clear();
+                start();
+                return;
+            }
+
+            socket.emit('setSocket' , {id});
 
             loadData(data);
 
@@ -419,13 +434,6 @@ async function start(){
 function loadData(data){
 
     console.log('1');
-
-    if(!data.me) {
-        alert('متاسفانه نتونستم اطلاعاتت رو پیدا کنم :(\nدوباره ثبت نام کن');
-        localStorage.clear();
-        start();
-        return;
-    }
 
     name = data.me.name ;
     avatar = data.me.avatar ;
