@@ -9,29 +9,42 @@
 <body>
 
 
-  <div id="chatMenu" class="menu" style="display: block">
+<div id="chatMenu" class="menu" style="display: block">
 
-      <div id="chatWindow" class="window phoneScreen">
+    <div id="chatWindow" class="window phoneScreen">
 
-          <div id="chatHeader">
-              <img src="" class="back">
-              <img src="" class="prof">
-              <span>امیرزا</span>
-          </div>
+        <div id="chatHeader">
+            <img src="assets/UI/back.png" class="back" onclick="clickBackChat()">
+            <img src="" class="prof">
+            <span>امیرزا</span>
+        </div>
 
-          <div id="chatScreen">
-              <div class="message receive">سلام خوبی؟ چه خبر؟</div>
-              <div class="message send">سلام ممنونم تو جطوری؟</div>
-          </div>
+        <div id="chatScreen">
 
-          <div id="chatInput">
-              <input placeholder="پیامت رو بنویس">
-              <img src="">
-          </div>
+            <div class="message receive">سلام خوبی چه خبر؟</div>
+            <div class="message send">سلام خوبم خداروشکر</div>
 
-      </div>
+        </div>
 
-  </div>
+        <template id="group-template">
+            <div class="messageBox">
+                <img src="assets/avatars/1.png">
+                <div class="message receive">
+                    <span>امیرزا</span>
+                    <p>کی بیریم آکواریوم؟ فردا خوبه؟</p>
+                </div>
+            </div>
+        </template>
+
+        <div id="chatFoot">
+            <div id="chatInput">
+                <input placeholder="پیامت رو بنویس">
+                <img src="assets/UI/send.png" onclick="clickSend()">
+            </div>
+        </div>
+    </div>
+
+</div>
 
 
 </body>

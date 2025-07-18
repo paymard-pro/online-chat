@@ -52,6 +52,10 @@
 }
 
 .message{
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
     border-radius: 10px;
     justify-content: center;
     align-items: center;
@@ -68,6 +72,21 @@
 .send{
     background-color: #a8ffcd;
     align-self: flex-end;
+}
+
+.messageBox{
+    display: flex;
+    align-items: flex-end;
+    gap: 7px;
+}
+
+.messageBox img{
+    width: 50px;
+    aspect-ratio: 1 / 1;
+}
+
+.messageBox span {
+    align-self: flex-start;
 }
 
 #chatFoot{
@@ -100,10 +119,13 @@
     text-align: left;
 }
 
+
 #chatInput > input:focus{
     border: none;
     outline: none;
 }
+
+
 #chatInput > img {
     height: 70%;
     aspect-ratio: 1 /1;

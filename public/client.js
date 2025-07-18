@@ -21,6 +21,7 @@ const chatScreen = document.getElementById('chatScreen');
 const allContacts = document.querySelector('#allContacts');
 
 const userBot = {name:'رایا' , avatar:10 , id:"bot"}
+const userGroup = {name : 'همه گله ای' , avatar:11 , id:'group'};
 
 let avatarSrc = avatar => `assets/avatars/${avatar}.png` ;
 let sendSrc = `assets/UI/send.png`;
@@ -32,13 +33,12 @@ let avatar = 0 ;
 let id ;
 let contactInChat = null;
 
+let selectUser = []; //for group
 // let messages = []; // [ ... , {contact:.. , send:.. , receive:..} ]
 // let users = []; // [ ... , {id:.. , name:.. , avatar:..} ]
 
 let users = {} ; // { id : {id , name , avatar , messages , online , lastMessage , unread} }  --- messages = [] // [... , {content , sendMe } ]
 let nextMessageId = 1 ;
-
-
 
 //---------------------------------- AUTH ---------------------------------------
 
@@ -75,7 +75,7 @@ async function submitAuth(){
         const data = await res.json();
 
         id = data.id;
-        localStorage.setItem(`user-id` , id); // TODO
+        localStorage.setItem(`user-id` , id);
 
     }catch (err){
         alert(err);
@@ -104,6 +104,17 @@ function clickAvatar(element , index){
 
 
 //---------------------------------- CONTACTS ---------------------------------------
+
+function clickJoinGroup(){
+    socket.emit('joinGroup');
+
+    users[userGroup.id] = {id: userGroup.id , name : userGroup.name , avatar:userGroup.avatar , messages : [] , online:false , unread : 0};
+    const welcomeMessage =  {content: `${name} به ${userGroup.name} پیوست`, send:id , id : nextMessageId++} ;
+    socket.emit('send' , {message: welcomeMessage.content , send : sendIdGroup(id)});
+
+    loadChat(userGroup);
+}
+
 
 function clickContact(element) {
 
@@ -207,7 +218,9 @@ function loadMain(){
 
     chatList.innerHTML = '';
 
-    Object.keys(users).sort((a , b) => users[a].messages.at(-1).id - users[b].messages.at(-1).id).forEach(userId => {
+    Object.keys(users).filter(u => users[u].messages.length > 0)
+        .sort((a , b) => users[a].messages.at(-1).id - users[b].messages.at(-1).id).
+        forEach(userId => {
         loadChatBox(users[userId]);
     })
 
@@ -263,17 +276,9 @@ function loadChat(newUser){
     chatScreen.innerHTML = '';
 
     console.log('messages: ' , users[user.id].messages);
-    
+
     for(let message of users[user.id].messages){
-
-        let messageBox = document.createElement('div');
-        messageBox.innerHTML = message.content;
-        if(message.sendMe)
-            messageBox.className = 'message send';
-        else
-            messageBox.className = 'message receive';
-
-        chatScreen.appendChild(messageBox);
+        contactInChat == userGroup.id && message.send != id ? loadGroupMessage(message.content , users[message.send]) : loadMessage(message.content , message.send);
     }
 
     allMenu.forEach(e => {e.style.display = 'none'});
@@ -286,7 +291,14 @@ function loadChat(newUser){
 }
 
 
+function pressEnter(event){
+    if(event.key == 'Enter'){
+        clickSend();
+    }
+}
+
 async function clickSend(){
+
     const messageInput = document.querySelector('#chatInput input');
     let message = messageInput.value;
     messageInput.value = '';
@@ -294,42 +306,46 @@ async function clickSend(){
     if(!message || message.trim() == "") return;
 
     //show my message
-    const messageBox = document.createElement('div');
-    messageBox.className = 'message send';
-    messageBox.innerHTML = message ;
-
-    chatScreen.appendChild(messageBox);
+    loadMessage(message , id) ;
     chatScreen.scrollTop =  chatScreen.scrollHeight ; //scroll down
 
-    users[contactInChat].messages.push({content: message , sendMe : true , id : nextMessageId++});
+    users[contactInChat].messages.push({content: message , send:id , id : nextMessageId++});
 
-    socket.emit('send' , {message , send: id , receive: contactInChat });
+    let sender = id;
+    if(contactInChat == userGroup.id) sender = sendIdGroup(id)
+
+    socket.emit('send' , {message , send: sender , receive: contactInChat });
 
 }
 
 
 socket.on('receive' , async (data) => {
+    console.log('receive: ' , data.send);
+    let isGroup = false ;
+    let sendId = data.send
+    let userId = data.send;
 
-    let isNew = users[data.send] ? false : true;
+    let sendInGroup = getUserId(data.send) ;
+    if(sendInGroup) { isGroup = true ; sendId = sendInGroup; userId = userGroup.id;}
+
+    let isNew = users[sendId] ? false : true;
 
     if(isNew) {
-        let newUser = await getUser(data.send);
-        users[data.send] = {id: newUser.id , name : newUser.name , avatar:newUser.avatar , messages : [] , online:true , unread : 0} ;
+        let newUser = await getUser(sendId);
+        users[newUser.id] = {id: newUser.id , name : newUser.name , avatar:newUser.avatar , messages : [] , online:true , unread : 0} ;
     }
 
-    const user  = users[data.send];
+    let  user  = users[userId];
 
     user.unread ++ ;
-    user.messages.push({content: data.message , sendMe : false , id: nextMessageId++});
+    user.messages.push({content: data.message , send: sendId , id: nextMessageId++});
 
-    if(chatMenu.style.display == 'block' && contactInChat == data.send){
+    if(chatMenu.style.display == 'block' && contactInChat == userId){
         user.unread = 0 ;
-        const messageBox = document.createElement('div');
-        messageBox.innerHTML = data.message ;
-        messageBox.className = 'message receive';
-        chatScreen.appendChild(messageBox);
-        chatScreen.scrollTop =  chatScreen.scrollHeight ; //scroll down
 
+        isGroup ? loadGroupMessage(data.message , users[sendId]) : sloadMessage(data.message , sendId);
+
+        chatScreen.scrollTop =  chatScreen.scrollHeight ; //scroll down
         socket.emit('read' , {send: contactInChat});
 
     }
@@ -346,15 +362,61 @@ socket.on('receive' , async (data) => {
         loadChatBox(user);
     }
 
+
 })
+
+
+function loadMessage(message , userId){
+
+    sendMe = userId == id ? true : false ;
+
+    const messageBox = document.createElement('div');
+    messageBox.dataset.id = userId ;
+    messageBox.className = `message ${sendMe? 'send' : 'receive'}` ;
+    messageBox.innerHTML = message ;
+
+    chatScreen.appendChild(messageBox);
+}
+
+function loadGroupMessage(message , user){
+
+    console.log('message:' , message) ;
+
+    const template = document.getElementById('group-template').content.cloneNode(true);
+    const messageBox = template.querySelector('.messageBox') ;
+    messageBox.dataset.id = user.id;
+    messageBox.querySelector('img').src = avatarSrc(user.avatar);
+
+    if(chatScreen.children.length > 0 && user.id == chatScreen.lastElementChild.dataset.id){
+        chatScreen.lastElementChild.querySelector('img').style.visibility = 'hidden' ;
+    }
+    else {
+        messageBox.querySelector('span').innerHTML = user.name ;
+    }
+
+    messageBox.querySelector('p').innerHTML = message ;
+
+    chatScreen.appendChild(messageBox);
+
+}
 
 function clickBackChat(){
     contactInChat = null ;
     loadMain();
 }
 
-
 //------------------------------------- UTILS ---------------------------------------
+
+
+function sendIdGroup(id){
+    return 'group-' + id ;
+}
+
+function getUserId(id) {
+    let match = id.match(/group-(.*)$/);
+    console.log('match:' , match);
+    return match ? match[1] : null;
+}
 
 
 async function getUser(id){

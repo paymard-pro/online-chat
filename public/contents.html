@@ -8,40 +8,44 @@
 </head>
 <body>
 
-  <div id="contentsMenu" class="menu">
-      <div id="contentsWindow" class="window phoneScreen">
 
-          <div id="contHeader">
-              <img src="">
-              <h1>گفتگوی جدید</h1>
-          </div>
+<div id="contactsMenu" class="menu" style="display: block">
+    <div id="contactsWindow" class="window phoneScreen">
 
-          <div id="contentsPage">
+        <div id="contHeader">
+            <img src="assets/UI/back.png" onclick="clickBackContact()">
+            <h1>گفتگوی جدید</h1>
+        </div>
 
-              <div id="newGroup" class="content">
-                  <img src="">
-                  <span>گروه جدید</span>
-              </div>
+        <div id="contactsPage">
 
-              <div id="allContents">
+            <div id="newGroup" onclick="clickJoinGroup()">
+                <img src="assets/avatars/11.png">
+                <span>همه گله ای</span>
+            </div>
 
-                  <div id="textAllContent">
-                      <span>لیست مخاطبین شما</span>
-                  </div>
+            <div id="textAllContact">
+                <span>لیست افراد حاضر</span>
+            </div>
 
-                  <div class="content">
-                        <img src="avatars/1.png">
-                        <div class="infoContent">
-                            <b id="infoContentName">ببراز</b>
-                            <span id="infoContentStatus">آنلاین</span>
-                        </div>
-                  </div>
+            <div id="allContacts">
+                <!--contact-->
+            </div>
 
-              </div>
+            <template id = "contact-template">
+                <div class="contact" data-id = "" onclick="clickContact(this)">
+                    <img src="">
+                    <div class="infoContact">
+                        <b>ببراز</b>
+                        <span>آنلاین</span>
+                    </div>
+                </div>
+            </template>
 
-          </div>
-      </div>
-  </div>
+        </div>
+    </div>
+</div>
+
 
 </body>
 </html>

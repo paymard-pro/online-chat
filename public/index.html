@@ -123,7 +123,7 @@
 
 
 
-<div id="contactsMenu" class="menu">
+<div id="contactsMenu" class="menu" style="display: block">
     <div id="contactsWindow" class="window phoneScreen">
 
         <div id="contHeader">
@@ -133,9 +133,9 @@
 
         <div id="contactsPage">
 
-            <div id="newGroup">
-                <img src="">
-                <span>گروه جدید</span>
+            <div id="newGroup" onclick="clickJoinGroup()">
+                <img src="assets/avatars/11.png">
+                <span>همه گله ای</span>
             </div>
 
             <div id="textAllContact">
@@ -177,10 +177,21 @@
 
         </div>
 
+        <template id="group-template">
+            <div class="messageBox" data-id="">
+                <img src="assets/avatars/1.png">
+                <div class="message receive">
+                    <span></span>
+                    <p>کی بیریم آکواریوم؟ فردا خوبه؟</p>
+                </div>
+            </div>
+        </template>
+
+
         <div id="chatFoot">
             <div id="chatInput">
-                <input placeholder="پیامت رو بنویس">
-                <img src="assets/UI/send.png" onclick="clickSend()">
+                <input placeholder="پیامت رو بنویس" onkeydown="pressEnter(event)">
+                <img src="assets/UI/send.png" onclick="clickSend()" >
             </div>
         </div>
     </div>

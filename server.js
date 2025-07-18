@@ -29,7 +29,7 @@ const io = require('socket.io')(http, {
 // لیست کاربران و اتاق‌ها
 const users = {}; // { id : {id:.. , name:.. , avatar:.. } }
 const sockets  = {}; // { id : socket }
-let nextUserIndex = 1 ;
+let nextGroupId = 1 ;
 
 db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
@@ -114,7 +114,6 @@ io.on('connection', (socket) => {
 
         if(!users[userId]) {
             let user = db.prepare(`SELECT userId AS id, name, avatar FROM users WHERE userId == ?`).get(userId);
-            user.index = nextUserIndex++;
             console.log('user get db: ', user);
             users[userId] = user;
         }
@@ -125,7 +124,8 @@ io.on('connection', (socket) => {
     })
 
     socket.on('send' , async (data) => {
-        db.prepare(`INSERT INTO messages (content , send , receive) VALUES (? , ? , ?)`).run(data.message , data.send , data.receive);
+        if(!isGroup(data.send))
+            db.prepare(`INSERT INTO messages (content , send , receive) VALUES (? , ? , ?)`).run(data.message , data.send , data.receive);
 
         if(data.receive == 'bot'){
             console.log('1');
@@ -134,8 +134,17 @@ io.on('connection', (socket) => {
             db.prepare(`INSERT INTO messages (content , send , receive) VALUES (? , ? , ?)`).run(message , 'bot' , data.send);
             socket.emit('receive' , {message , send : 'bot'});
         }
+        else if(isGroup(data.send)) {
+            console.log('group');
+            socket.to('group').emit('receive', {message: data.message, send: data.send});
+        }
         else if(sockets[data.receive] && sockets[data.receive].connected) {
             sockets[data.receive].emit('receive', { message: data.message, send: data.send});
+        }
+
+
+        function isGroup(id){
+            return !!id.match(/^group/);
         }
     })
 
@@ -167,7 +176,12 @@ io.on('connection', (socket) => {
     }
 
     socket.on('read' , (data) => {
-        db.prepare(`UPDATE messages SET read = 1 WHERE send = ? AND receive = ? AND read = 0`).run(data.send , socket.userId);
+        if(data.send != 'group')
+            db.prepare(`UPDATE messages SET read = 1 WHERE send = ? AND receive = ? AND read = 0`).run(data.send , socket.userId);
+    })
+
+    socket.on('joinGroup' , () => {
+        socket.join('group') ;
     })
 
     socket.on('disconnect', () => {
@@ -177,7 +191,7 @@ io.on('connection', (socket) => {
 
         delete sockets[id];
         delete users[id];
-
+        socket.leave('group');
         io.emit('offlineContact' , {id});
     });
 
