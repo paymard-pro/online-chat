@@ -105,12 +105,16 @@ function clickAvatar(element , index){
 
 //---------------------------------- CONTACTS ---------------------------------------
 
-function clickJoinGroup(){
+async function clickJoinGroup(){
     socket.emit('joinGroup');
 
-    users[userGroup.id] = {id: userGroup.id , name : userGroup.name , avatar:userGroup.avatar , messages : [] , online:false , unread : 0};
-    const welcomeMessage =  {content: `${name} به ${userGroup.name} پیوست`, send:id , id : nextMessageId++} ;
-    socket.emit('send' , {message: welcomeMessage.content , send : sendIdGroup(id)});
+    if(!users[userGroup.id]) {
+        const welcomeMessage =  {content: `${name} به ${userGroup.name} پیوست`, send:id , id : nextMessageId++} ;
+        socket.emit('send' , {message: welcomeMessage.content , send : sendIdGroup(id)});
+
+        const group = await getGroup();
+        users[userGroup.id] = {id: userGroup.id , name : userGroup.name , avatar:userGroup.avatar , messages : group.messages , online:false , unread : 0};
+    }
 
     loadChat(userGroup);
 }
@@ -343,7 +347,7 @@ socket.on('receive' , async (data) => {
     if(chatMenu.style.display == 'block' && contactInChat == userId){
         user.unread = 0 ;
 
-        isGroup ? loadGroupMessage(data.message , users[sendId]) : sloadMessage(data.message , sendId);
+        isGroup ? loadGroupMessage(data.message , users[sendId]) : loadMessage(data.message , sendId);
 
         chatScreen.scrollTop =  chatScreen.scrollHeight ; //scroll down
         socket.emit('read' , {send: contactInChat});
@@ -433,6 +437,17 @@ async function getUser(id){
     }
 }
 
+async function getGroup(){
+    try{
+        const res = await fetch('/api/group') ;
+        const group =  await res.json();
+
+        return group;
+    }catch (err){
+        console.log(err);
+    }
+}
+
 
 function getUserByContact(element){
 
@@ -452,6 +467,7 @@ function getUserByContact(element){
 async function start(){
 
     allMenu.forEach(e => {e.style.display = 'none'});
+    users = {};
 
     let userId = localStorage.getItem('user-id');
     if(!userId){
@@ -464,7 +480,7 @@ async function start(){
 
 
         try{
-            const res = await fetch('/api/data', {
+            let res = await fetch('/api/data', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({id})
             });
@@ -483,6 +499,11 @@ async function start(){
 
             loadData(data);
 
+            let group =  await getGroup() ;
+            if(group.users.includes(id))
+                users[userGroup.id] = {id: userGroup.id, name: userGroup.name, avatar: userGroup.avatar, messages: group.messages, online: false,unread: 0};
+
+
             console.log('my users: ' , users);
 
         }catch (err){
@@ -500,13 +521,11 @@ function loadData(data){
     name = data.me.name ;
     avatar = data.me.avatar ;
 
-    users = {};
-
     console.log('name : ' , name , "-avatar :" , avatar);
     console.log('2');
     let i = 0 ; //debug
 
-    for(let message of data.messages){
+    for(let message of data.messages){;
         console.log('3')
 
         let userId = message.send == id ? message.receive : message.send ;
@@ -517,9 +536,8 @@ function loadData(data){
 
         let user = users[userId] ;
 
-        let sendMe = message.send == id ? true : false ;
-        user.messages.push({content: message.content , sendMe , id : message.id});
-        if(!message.read && !sendMe) user.unread++ ;
+        user.messages.push({content: message.content , send:message.send , id : message.id});
+        if(!message.read && message.send != id) user.unread++ ;
 
 
         console.log('debug : ' , i++) ;

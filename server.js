@@ -29,7 +29,8 @@ const io = require('socket.io')(http, {
 // لیست کاربران و اتاق‌ها
 const users = {}; // { id : {id:.. , name:.. , avatar:.. } }
 const sockets  = {}; // { id : socket }
-let nextGroupId = 1 ;
+const group = {users: [] , messages:[]}; // messages = [ ... , {content , send , read}]
+
 
 db.prepare(`
     CREATE TABLE IF NOT EXISTS users (
@@ -62,7 +63,7 @@ app.post("/api/users", (req, res) => {
     const uniqueId = uuidv4();
 
     db.prepare('INSERT INTO users (name , userId , avatar) VALUES (?,?,?)').run(name, uniqueId, avatar);
-    let newUser = {id: uniqueId , name , avatar , index : nextUserIndex++};
+    let newUser = {id: uniqueId , name , avatar};
     users[uniqueId] = newUser ;
 
     console.log(newUser);
@@ -97,6 +98,10 @@ app.post('/api/data' , (req , res) => {
     res.json({messages , users , me});
 })
 
+app.get('/api/group' , (req , res) => {
+    res.json(group);
+})
+
 io.on('connection', (socket) => {
 
     if(socket.userId) {
@@ -111,6 +116,9 @@ io.on('connection', (socket) => {
         let userId = data.id
         sockets[userId] = socket;
         socket.userId = userId;
+
+        if(group.users.includes(userId))
+            socket.join('group');
 
         if(!users[userId]) {
             let user = db.prepare(`SELECT userId AS id, name, avatar FROM users WHERE userId == ?`).get(userId);
@@ -136,6 +144,8 @@ io.on('connection', (socket) => {
         }
         else if(isGroup(data.send)) {
             console.log('group');
+
+            group.messages.push({content : data.message , send: getUserId(data.send) , read: false});
             socket.to('group').emit('receive', {message: data.message, send: data.send});
         }
         else if(sockets[data.receive] && sockets[data.receive].connected) {
@@ -148,30 +158,42 @@ io.on('connection', (socket) => {
         }
     })
 
-
+    function getUserId(id) {
+        let match = id.match(/group-(.*)$/);
+        console.log('match:' , match);
+        return match ? match[1] : null;
+    }
 
     async function responseBot(message){
 
-        let messages = [{role:'system' , content:'تو یه ربات باحال هستی به اسم رایا و از سیاره ای دور دست اومدی و الان روی زمین سرگردان هستی. سعی کن کوتاه جواب بدی بعضی وقت ها هم ایموجی استفاده کن'} ,
-            {role: 'user' , content: message}];
-
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": "Bearer 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",
-                "Content-Type": "application/json"
+        try {
+            let messages = [{
+                role: 'system',
+                content: 'تو یه ربات باحال هستی به اسم رایا و از سیاره ای دور دست اومدی و الان روی زمین سرگردان هستی. سعی کن کوتاه جواب بدی بعضی وقت ها هم ایموجی استفاده کن'
             },
-            body: JSON.stringify({
-                model: "moonshotai/kimi-k2:free",
-                messages: messages
-            })
-        }) ;
+                {role: 'user', content: message}];
 
-        const json = await response.json();
+            const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                method: "POST",
+                headers: {
+                    "Authorization": "Bearer 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",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    model: "moonshotai/kimi-k2:free",
+                    messages: messages
+                })
+            });
 
-        let res =  json.choices[0].message.content;
-        console.log("پاسخ:", res);
-        return res ;
+            const json = await response.json();
+
+            let res = json.choices[0].message.content;
+            console.log("پاسخ:", res);
+            return res;
+        }catch (err){
+            return 'متاسفانه ارتباط برقرار نشد. 😔' ;
+            console.log(err)
+        }
 
     }
 
@@ -182,6 +204,7 @@ io.on('connection', (socket) => {
 
     socket.on('joinGroup' , () => {
         socket.join('group') ;
+        group.users.push(socket.userId);
     })
 
     socket.on('disconnect', () => {
