@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io('http://192.168.220.181:3000');
 //'https://online-chat-7sal.onrender.com'
 //'http://192.168.1.3:3000'
 
@@ -32,6 +32,7 @@ let name ;
 let avatar = 0 ;
 let id ;
 let contactInChat = null;
+
 
 let selectUser = []; //for group
 // let messages = []; // [ ... , {contact:.. , send:.. , receive:..} ]
@@ -467,7 +468,6 @@ function getUserByContact(element){
 async function start(){
 
     allMenu.forEach(e => {e.style.display = 'none'});
-    users = {};
 
     let userId = localStorage.getItem('user-id');
     if(!userId){
@@ -496,6 +496,8 @@ async function start(){
             }
 
             socket.emit('setSocket' , {id});
+
+            users = {};
 
             loadData(data);
 
