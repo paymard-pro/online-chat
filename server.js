@@ -93,10 +93,12 @@ app.get('/api/users' , (req , res) => {
 
 
 app.get('/api/user' , (req , res) => {
-    console.log('id: ', req.query.id);
-    console.log('user: ' , users[req.query.id]) ;
+    let id = req.query.id ;
+    let user = db.prepare(`SELECT * FROM users WHERE userId = ?`).get(id);
 
-    res.json(users[req.query.id]);
+    console.log('get user: ' , user);
+
+    res.json({id , name: user.name , avatar: user.avatar});
 })
 
 
@@ -128,9 +130,6 @@ io.on('connection', (socket) => {
         let userId = data.id
         sockets[userId] = socket;
         socket.userId = userId;
-
-        if(group.users.includes(userId))
-            socket.join('group');
 
         if(!users[userId]) {
             let user = db.prepare(`SELECT userId AS id, name, avatar FROM users WHERE userId == ?`).get(userId);

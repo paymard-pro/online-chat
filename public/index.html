@@ -104,7 +104,9 @@
                 <img src = 'avatars/1.png'>
                 <div class="showChat">
                     <b>امیرزا</b>
-                    <span>آخرین پیام اینه ...</span>
+                    <div class="lastMessage">
+                        <span dir="ltr">آخرین پیام اینه ...</span>
+                    </div>
                 </div>
                 <div class="countMassage">
                     <span>1</span>
@@ -190,7 +192,7 @@
 
         <div id="chatFoot">
             <div id="chatInput">
-                <input placeholder="پیامت رو بنویس" onkeydown="pressEnter(event)">
+                <input placeholder="پیامت رو بنویس" onkeydown="pressEnter(event)" dir="rtl">
                 <img src="assets/UI/send.png" onclick="clickSend()" >
             </div>
         </div>
