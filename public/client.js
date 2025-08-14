@@ -1,4 +1,4 @@
-const socket = io('http://192.168.220.181:3000');
+const socket = io();
 //'https://online-chat-7sal.onrender.com'
 //'http://192.168.1.3:3000'
 
