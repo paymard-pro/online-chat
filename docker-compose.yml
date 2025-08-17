@@ -1,0 +1,19 @@
+
+services:
+  chatapp:
+    build: .
+    # بهتره یک نام کانتینر مشخص داشته باشه
+    container_name: chatapp
+    ports:
+      - "3000:3000"
+    # سورس پروژه روی /app مونت می‌شود و node_modules داخل کانتینر می‌ماند
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      # اگر کلید OpenRouter داری و نمی‌خواهی داخل ایمیج bake شود:
+      # - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+    restart: unless-stopped
+
