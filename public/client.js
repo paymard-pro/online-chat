@@ -1,6 +1,6 @@
-const socket = io();
+const socket = io('http://192.168.1.3:3000');
 //'https://online-chat-7sal.onrender.com'
-//'http://192.168.1.3:3000'
+//''
 
 const allMenu = document.querySelectorAll('.menu');
 const nameDoc = document.getElementById('name');
